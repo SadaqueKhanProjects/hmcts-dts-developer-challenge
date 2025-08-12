@@ -1,18 +1,20 @@
 # HMCTS DTS Developer Challenge
 
 **HMCTS DTS Developer Challenge** is a monorepo containing both the **frontend** and **backend** for the HMCTS Tasks application.  
-It includes a root-level **Docker Compose** setup to run the entire application in one command.
+It includes a root-level **Docker Compose** setup to run the entire application with a single command.
 
 ---
 
 ## 📂 Repository Structure
 
 ```
+
 hmcts-dts-developer-challenge/
-├── docker-compose.yml              # Runs frontend + backend together
+├── docker-compose.yml              # Runs backend + database together
 ├── hmcts-tasks-backend-api/        # Java Spring Boot backend
 └── hmcts-tasks-frontend-client/    # Node/TypeScript frontend
-```
+
+````
 
 ---
 
@@ -20,9 +22,10 @@ hmcts-dts-developer-challenge/
 
 | Component  | Tools / Frameworks                               |
 |------------|--------------------------------------------------|
-| Backend    | Java 17, Spring Boot, Gradle, REST API           |
+| Backend    | Java 21, Spring Boot, Gradle, REST API, PostgreSQL |
 | Frontend   | Node.js, TypeScript, Nunjucks, GOV.UK Design System |
 | Container  | Docker, Docker Compose                           |
+| Database   | PostgreSQL 16                                    |
 
 ---
 
@@ -33,54 +36,95 @@ hmcts-dts-developer-challenge/
 ```bash
 git clone https://github.com/SadaqueKhanProjects/hmcts-dts-developer-challenge.git
 cd hmcts-dts-developer-challenge
+````
+
+---
+
+### 2️⃣ Install Prerequisites
+
+Ensure the following are installed on your system:
+
+* **[Docker](https://docs.docker.com/get-docker/)** (includes Docker Compose)
+* **[Java 21 JDK](https://adoptium.net/temurin/releases/)** (for local backend runs)
+* **[Gradle](https://gradle.org/install/)** (optional, backend has wrapper)
+* **[Node.js 18+](https://nodejs.org/en)** & **Yarn** (for local frontend runs)
+
+Check versions:
+
+```bash
+docker --version
+docker compose version
+java -version
+node -v
+yarn -v
 ```
 
 ---
 
-### 2️⃣ Set Environment Variables
+### 3️⃣ Set Environment Variables
 
-Create a `.env` file in the root directory (next to `docker-compose.yml`).  
-Example:
+#### Root `.env` (used by Docker Compose)
+
+Create a `.env` in the root directory:
 
 ```bash
-# Example environment variables
-SPRING_PROFILES_ACTIVE=dev
-BACKEND_PORT=8080
-FRONTEND_PORT=3000
+SERVER_PORT=4000
+
+DB_HOST=postgres
+DB_PORT=5432
+DB_NAME=tasks
+DB_USER_NAME=app_user
+DB_PASSWORD=super_secure_password_123
+
+FRONTEND_ORIGIN=http://localhost:3100
 ```
+
+#### Frontend `.env` (for local runs)
+
+Create a `.env` inside `hmcts-tasks-frontend-client/`:
+
+```bash
+PORT=3100
+NODE_ENV=development
+BACKEND_URL=http://localhost:4000
+```
+
+> If running frontend in Docker, set:
+> `BACKEND_URL=http://backend:4000`
 
 ---
 
-### 3️⃣ Run with Docker Compose
+### 4️⃣ Run with Docker Compose
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 This will:
-- Build and run the **backend API** on `http://localhost:8080`
-- Build and run the **frontend** on `http://localhost:3000`
+
+* Start **PostgreSQL** on `localhost:5432`
+* Start **backend API** on `http://localhost:4000`
 
 ---
 
-### 4️⃣ Stopping the App
+### 5️⃣ Stopping the App
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ---
 
 ## 🧪 Running Services Individually
 
-If you want to run **only the backend**:
+Run **only the backend**:
 
 ```bash
 cd hmcts-tasks-backend-api
 ./gradlew bootRun
 ```
 
-If you want to run **only the frontend**:
+Run **only the frontend**:
 
 ```bash
 cd hmcts-tasks-frontend-client
@@ -90,6 +134,35 @@ yarn start
 
 ---
 
+## 🔍 Verifying Services
+
+Check backend health:
+
+```bash
+curl http://localhost:4000/actuator/health
+```
+
+Test API:
+
+```bash
+curl http://localhost:4000/tasks
+```
+
+---
+
+## 🛠 Troubleshooting
+
+| Issue                                  | Cause                                     | Fix                                           |
+| -------------------------------------- | ----------------------------------------- | --------------------------------------------- |
+| Port already in use                    | Another service is using `4000`/`3100`    | Stop the service or change `.env` ports       |
+| Frontend CORS errors                   | Wrong `FRONTEND_ORIGIN` in `.env`         | Update `.env` and restart backend             |
+| Frontend in Docker can’t reach backend | Using `localhost` instead of service name | Use `http://backend:4000`                     |
+| DB connection failed                   | Wrong credentials or DB not ready         | Check `.env` and ensure `postgres` is running |
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+```
