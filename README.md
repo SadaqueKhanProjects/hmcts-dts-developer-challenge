@@ -11,8 +11,9 @@ It includes a root-level **Docker Compose** setup to run the entire application 
 
 hmcts-dts-developer-challenge/
 ├── docker-compose.yml              # Runs backend + database together
-├── hmcts-tasks-backend-api/        # Java Spring Boot backend
-└── hmcts-tasks-frontend-client/    # Node/TypeScript frontend
+├── .env.example                     # Example environment variables
+├── hmcts-tasks-backend-api/         # Java Spring Boot backend
+└── hmcts-tasks-frontend-client/     # Node/TypeScript frontend
 
 ````
 
@@ -22,10 +23,29 @@ hmcts-dts-developer-challenge/
 
 | Component  | Tools / Frameworks                               |
 |------------|--------------------------------------------------|
-| Backend    | Java 21, Spring Boot, Gradle, REST API, PostgreSQL |
-| Frontend   | Node.js, TypeScript, Nunjucks, GOV.UK Design System |
+| Backend    | Java 21, Spring Boot, Gradle (wrapper), REST API, PostgreSQL |
+| Frontend   | Node.js 18/20 LTS, TypeScript, Express, Nunjucks, GOV.UK Frontend |
 | Container  | Docker, Docker Compose                           |
 | Database   | PostgreSQL 16                                    |
+
+---
+
+## 📋 Prerequisites
+
+Install the following before starting:
+
+| Tool            | Required Version | Check Command                 |
+|-----------------|------------------|--------------------------------|
+| Docker Desktop  | 4.30+            | `docker --version`            |
+| Docker Compose  | v2.24+           | `docker compose version`      |
+| Java JDK        | 21               | `java -version`               |
+| Gradle          | (wrapper)        | `./gradlew -v`                 |
+| Node.js         | 18.x or 20.x     | `node -v`                     |
+| npm             | 9+               | `npm -v`                      |
+| Yarn            | **3.8.2**        | `yarn -v`                     |
+| PostgreSQL      | 16               | (via Docker image)            |
+
+> ⚠️ The frontend requires **Yarn 3.8.2** to execute correctly.
 
 ---
 
@@ -38,36 +58,21 @@ git clone https://github.com/SadaqueKhanProjects/hmcts-dts-developer-challenge.g
 cd hmcts-dts-developer-challenge
 ````
 
----
-
-### 2️⃣ Install Prerequisites
-
-Ensure the following are installed on your system:
-
-* **[Docker](https://docs.docker.com/get-docker/)** (includes Docker Compose)
-* **[Java 21 JDK](https://adoptium.net/temurin/releases/)** (for local backend runs)
-* **[Gradle](https://gradle.org/install/)** (optional, backend has wrapper)
-* **[Node.js 18+](https://nodejs.org/en)** & **Yarn** (for local frontend runs)
-
-Check versions:
+If using submodules:
 
 ```bash
-docker --version
-docker compose version
-java -version
-node -v
-yarn -v
+git submodule update --init --recursive
 ```
 
 ---
 
-### 3️⃣ Set Environment Variables
+### 2️⃣ Set Environment Variables
 
 #### Root `.env` (used by Docker Compose)
 
-Create a `.env` in the root directory:
+Create in the project root:
 
-```bash
+```env
 SERVER_PORT=4000
 
 DB_HOST=postgres
@@ -81,20 +86,19 @@ FRONTEND_ORIGIN=http://localhost:3100
 
 #### Frontend `.env` (for local runs)
 
-Create a `.env` inside `hmcts-tasks-frontend-client/`:
+Create in `hmcts-tasks-frontend-client/`:
 
-```bash
+```env
 PORT=3100
 NODE_ENV=development
 BACKEND_URL=http://localhost:4000
 ```
 
-> If running frontend in Docker, set:
-> `BACKEND_URL=http://backend:4000`
+> If running the frontend in Docker, set `BACKEND_URL=http://backend:4000`.
 
 ---
 
-### 4️⃣ Run with Docker Compose
+### 3️⃣ Run with Docker Compose
 
 ```bash
 docker compose up --build
@@ -105,9 +109,7 @@ This will:
 * Start **PostgreSQL** on `localhost:5432`
 * Start **backend API** on `http://localhost:4000`
 
----
-
-### 5️⃣ Stopping the App
+Stop containers:
 
 ```bash
 docker compose down
@@ -115,16 +117,17 @@ docker compose down
 
 ---
 
-## 🧪 Running Services Individually
+### 4️⃣ Running Services Individually
 
-Run **only the backend**:
+**Backend only (with DB in Docker):**
 
 ```bash
+docker compose up postgres
 cd hmcts-tasks-backend-api
 ./gradlew bootRun
 ```
 
-Run **only the frontend**:
+**Frontend only:**
 
 ```bash
 cd hmcts-tasks-frontend-client
@@ -152,12 +155,12 @@ curl http://localhost:4000/tasks
 
 ## 🛠 Troubleshooting
 
-| Issue                                  | Cause                                     | Fix                                           |
-| -------------------------------------- | ----------------------------------------- | --------------------------------------------- |
-| Port already in use                    | Another service is using `4000`/`3100`    | Stop the service or change `.env` ports       |
-| Frontend CORS errors                   | Wrong `FRONTEND_ORIGIN` in `.env`         | Update `.env` and restart backend             |
-| Frontend in Docker can’t reach backend | Using `localhost` instead of service name | Use `http://backend:4000`                     |
-| DB connection failed                   | Wrong credentials or DB not ready         | Check `.env` and ensure `postgres` is running |
+| Issue                                  | Cause                              | Fix                                                     |
+| -------------------------------------- | ---------------------------------- | ------------------------------------------------------- |
+| Port already in use                    | Another service is using the port  | Stop the service or change `.env` port                  |
+| Frontend CORS errors                   | Wrong `FRONTEND_ORIGIN` in `.env`  | Update `.env` and restart backend                       |
+| Frontend in Docker can’t reach backend | Using `localhost` inside container | Use `http://backend:4000`                               |
+| DB connection failed                   | Wrong credentials or DB not ready  | Check `.env` and ensure `postgres` container is running |
 
 ---
 
@@ -165,4 +168,3 @@ curl http://localhost:4000/tasks
 
 This project is licensed under the MIT License.
 
-```
