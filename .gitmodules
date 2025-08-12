@@ -1,6 +1,6 @@
 [submodule "hmcts-tasks-frontend-client"]
 	path = hmcts-tasks-frontend-client
-	url = git@github.com:SadaqueKhanProjects/hmcts-tasks-frontend-client.git
+	url = https://github.com/SadaqueKhanProjects/hmcts-tasks-frontend-client.git
 [submodule "hmcts-tasks-backend-api"]
 	path = hmcts-tasks-backend-api
-	url = git@github.com:SadaqueKhanProjects/hmcts-tasks-backend-api.git
+	url = https://github.com/SadaqueKhanProjects/hmcts-tasks-backend-api.git
