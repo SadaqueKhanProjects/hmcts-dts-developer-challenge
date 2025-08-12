@@ -1,0 +1,11 @@
+{
+    {
+        "editor.formatOnSave": true,
+        "[java]": {
+            "editor.defaultFormatter": "google.java.format"
+        }
+    },
+    "java.checkstyle.enabled": true,
+    "java.checkstyle.configuration": "${workspaceFolder}/config/checkstyle/checkstyle.xml",
+    "java.configuration.updateBuildConfiguration": "interactive" // or your actual path
+}
